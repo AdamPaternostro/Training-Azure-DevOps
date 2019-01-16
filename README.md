@@ -188,30 +188,31 @@ We will be using the visual interface
 1. Edit the Build 
 2. Clone the Copy Files task SampleWebApp-ARM-Templates
 3. Edit the new task and change the folder to AzureFunction-ARM-Templates
-4. Save and Build
-5. Edit the Prod stage
-6. Clone the ARM task
+4. Add a new task Archive Files
+   - Root Folder: AzureFunction-Code
+   - Archive File to Create: $(Build.ArtifactStagingDirectory)/AzureFunction.zip
+5. Save and Build
+6. Edit the Prod stage
+7. Clone the ARM task
    - Edit Template path (e.g. $(System.DefaultWorkingDirectory)/_Training-Azure-DevOps-Build/drop/arm-function-template.json)
    - Edit the Override template parameters 
       - NOTE: You might need to change the storage account name to be unique
      ```
      -AzureFunctionPlanName $(AppServicePlan)-Function-$(Environment) -AzureFunctionAppName $(WebApp)-Function-$(Environment)  -AzureFunctionStorageAccountName functionappstorage001
      ```
-7. Clone the App Service Deploy task
+8. Clone the App Service Deploy task
    - Change App Type to Function App
    - Uncheck deploy to slot
-   - Change the Package / Folder path (e.g. $(System.DefaultWorkingDirectory)/_Training-Azure-DevOps-Build/drop/AzureFunction-Code.zip)
+   - Change the Package / Folder path (e.g. $(System.DefaultWorkingDirectory)/_Training-Azure-DevOps-Build/drop/AzureFunctionode.zip)
       - The code has been zipped up for your convience
-8. Change the variable DeployARMTemplate to "true" (since we have a new ARM template). You can disable the approvals as well to save time.     
-9. Save and run to make sure things are working, you should also check to make sure the Function App was deployed      
-10. Change the variable DeployARMTemplate to "false" if things worked
+9. Change the variable DeployARMTemplate to "true" (since we have a new ARM template). You can disable the approvals as well to save time.     
+10. Save and run to make sure things are working, you should also check to make sure the Function App was deployed      
+11. Change the variable DeployARMTemplate to "false" if things worked
 
 ### Do QA in parallel (just to demo)
 
-Create Azure function
+### To Do
 Create gate
-
-
 Create Azure container registry
 Create Azure Linux Web App
 Import code

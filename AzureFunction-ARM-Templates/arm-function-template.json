@@ -108,7 +108,30 @@
                 ],
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('AzureFunctionPlanName'))]",
                 "reserved": false,
-                "siteConfig": null,
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "AzureWebJobsStorage",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('AzureFunctionStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('AzureFunctionStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('AzureFunctionStorageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('AzureFunctionStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTSHARE",
+                            "value": "[toLower(parameters('AzureFunctionAppName'))]"
+                        },
+                        {
+                            "name": "FUNCTIONS_EXTENSION_VERSION",
+                            "value": "~2"
+                        },
+                        {
+                            "name": "FUNCTIONS_WORKER_RUNTIME",
+                            "value": "dotnet"
+                        }
+                    ]
+                },
                 "scmSiteAlsoStopped": false,
                 "hostingEnvironmentProfile": null,
                 "clientAffinityEnabled": false,
@@ -120,7 +143,8 @@
                 "httpsOnly": false
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Web/serverfarms', parameters('AzureFunctionPlanName'))]"
+                "[resourceId('Microsoft.Web/serverfarms', parameters('AzureFunctionPlanName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('AzureFunctionStorageAccountName'))]"              
             ]
         },
         {
