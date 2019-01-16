@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "AzureFunctionPlanName": {
-            "defaultValue": "CentralUSPlan",
+            "defaultValue": "EastUSPlan",
             "type": "String"
         },
         "AzureFunctionAppName": {
@@ -28,7 +28,7 @@
             "kind": "Storage",
             "name": "[parameters('AzureFunctionStorageAccountName')]",
             "apiVersion": "2018-07-01",
-            "location": "centralus",
+            "location": "East US",
             "tags": {},
             "scale": null,
             "properties": {
@@ -65,7 +65,7 @@
             "kind": "functionapp",
             "name": "[parameters('AzureFunctionPlanName')]",
             "apiVersion": "2016-09-01",
-            "location": "Central US",
+            "location": "East US",
             "scale": null,
             "properties": {
                 "name": "[parameters('AzureFunctionPlanName')]",
@@ -84,7 +84,7 @@
             "kind": "functionapp",
             "name": "[parameters('AzureFunctionAppName')]",
             "apiVersion": "2016-08-01",
-            "location": "Central US",
+            "location": "East US",
             "scale": null,
             "properties": {
                 "enabled": true,
@@ -127,7 +127,7 @@
             "type": "Microsoft.Web/sites/config",
             "name": "[concat(parameters('AzureFunctionAppName'), '/', 'web')]",
             "apiVersion": "2016-08-01",
-            "location": "Central US",
+            "location": "East US",
             "scale": null,
             "properties": {
                 "numberOfWorkers": 1,
@@ -249,7 +249,7 @@
             "type": "Microsoft.Web/sites/hostNameBindings",
             "name": "[concat(parameters('AzureFunctionAppName'), '/', variables('hostNameBindings_training_azure_devops_functionapp.azurewebsites.net_name'))]",
             "apiVersion": "2016-08-01",
-            "location": "Central US",
+            "location": "East US",
             "scale": null,
             "properties": {
                 "siteName": "Training-Azure-DevOps-FunctionApp",
