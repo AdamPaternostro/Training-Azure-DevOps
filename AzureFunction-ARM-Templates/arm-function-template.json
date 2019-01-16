@@ -20,7 +20,6 @@
     },
     "resources": [
         {
-            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps-Function/providers/Microsoft.Storage/storageAccounts/functionappstorage001'.",
             "type": "Microsoft.Storage/storageAccounts",
             "sku": {
                 "name": "Standard_LRS",
@@ -55,7 +54,6 @@
             "dependsOn": []
         },
         {
-            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps-Function/providers/Microsoft.Web/serverfarms/CentralUSPlan'.",
             "type": "Microsoft.Web/serverfarms",
             "sku": {
                 "name": "Y1",
@@ -82,7 +80,6 @@
             "dependsOn": []
         },
         {
-            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps-Function/providers/Microsoft.Web/sites/Training-Azure-DevOps-FunctionApp'.",
             "type": "Microsoft.Web/sites",
             "kind": "functionapp",
             "name": "[parameters('AzureFunctionAppName')]",
@@ -127,7 +124,6 @@
             ]
         },
         {
-            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps-Function/providers/Microsoft.Web/sites/Training-Azure-DevOps-FunctionApp/config/web'.",
             "type": "Microsoft.Web/sites/config",
             "name": "[concat(parameters('AzureFunctionAppName'), '/', 'web')]",
             "apiVersion": "2016-08-01",
@@ -250,7 +246,6 @@
             ]
         },
         {
-            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps-Function/providers/Microsoft.Web/sites/Training-Azure-DevOps-FunctionApp/hostNameBindings/training-azure-devops-functionapp.azurewebsites.net'.",
             "type": "Microsoft.Web/sites/hostNameBindings",
             "name": "[concat(parameters('AzureFunctionAppName'), '/', variables('hostNameBindings_training_azure_devops_functionapp.azurewebsites.net_name'))]",
             "apiVersion": "2016-08-01",

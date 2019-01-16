@@ -137,7 +137,7 @@ We will be using the visual interface
 11. Delete the Swap Slots task
 12. Save and Run a release
 
-### Add condtions
+### Add conditions
 1. Added a variable called DeployARMTemplate and set the value to false
 2. For each stage
    - Enable the ARM template
@@ -183,6 +183,23 @@ We will be using the visual interface
    - The build should kick off automatically (click on bulids)
    - The release should kick off automatically (click on releases when build is done)
    - You can verify the new code is moving through environments by viewing the websites (the prod slot witll have the changes,the old site will be in the preprod slot)
+
+### Implement a Gate
+1. Edit the Build 
+2. Clone the Copy Files task SampleWebApp-ARM-Templates
+3. Edit the new task and change the folder to AzureFunction-ARM-Templates
+4. Save and Build
+5. Edit the Prod stage
+6. Clone the ARM task
+   - Edit Template path (e.g. $(System.DefaultWorkingDirectory)/_Training-Azure-DevOps-Build/drop/arm-function-template.json)
+   - Edit the Override template parameters (NOTE: You might need to change the storage account name)
+     ```
+     -AzureFunctionPlanName $(AppServicePlan)-Function-$(Environment) -AzureFunctionAppName $(WebApp)-Function-$(Environment)  -AzureFunctionStorageAccountName functionappstorage001
+     ```
+7. Clone the App Service Deploy task
+   - Change App Type to Function App
+   - Uncheck deploy to slot
+   - Change the Package / Folder path (e.g. $(System.DefaultWorkingDirectory)/_Training-Azure-DevOps-Build/drop/AzureFunction-Code.zip)
 
 ### Do QA in parallel (just to demo)
 

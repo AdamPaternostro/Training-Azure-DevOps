@@ -21,7 +21,6 @@
     },
     "resources": [
         {
-            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps/providers/Microsoft.Web/serverfarms/TrainingAzureDevOpsAppServicePlan'.",
             "type": "Microsoft.Web/serverfarms",
             "sku": {
                 "name": "S1",
@@ -48,7 +47,6 @@
             "dependsOn": []
         },
         {
-            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps/providers/Microsoft.Web/sites/TrainingAzureDevOpsWebApp'.",
             "type": "Microsoft.Web/sites",
             "kind": "app",
             "name": "[parameters('sites_TrainingAzureDevOpsWebApp_name')]",
@@ -93,7 +91,6 @@
             ]
         },
         {
-            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps/providers/Microsoft.Web/sites/TrainingAzureDevOpsWebApp/config/web'.",
             "type": "Microsoft.Web/sites/config",
             "name": "[concat(parameters('sites_TrainingAzureDevOpsWebApp_name'), '/', 'web')]",
             "apiVersion": "2016-08-01",
@@ -210,7 +207,6 @@
             ]
         },
         {
-            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps/providers/Microsoft.Web/sites/TrainingAzureDevOpsWebApp/hostNameBindings/trainingazuredevopswebapp.azurewebsites.net'.",
             "type": "Microsoft.Web/sites/hostNameBindings",
             "name": "[concat(parameters('sites_TrainingAzureDevOpsWebApp_name'), '/', variables('hostNameBindings_trainingazuredevopswebapp.azurewebsites.net_name'))]",
             "apiVersion": "2016-08-01",
@@ -226,7 +222,6 @@
             ]
         },
         {
-            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps/providers/Microsoft.Web/sites/trainingazuredevopswebapp/slots/Preprod'.",
             "type": "Microsoft.Web/sites/slots",
             "kind": "app",
             "name": "[concat(parameters('sites_TrainingAzureDevOpsWebApp_name'), '/', parameters('slots_Preprod_name'))]",
@@ -272,7 +267,6 @@
             ]
         },
         {
-            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps/providers/Microsoft.Web/sites/trainingazuredevopswebapp/slots/Preprod/config/web'.",
             "type": "Microsoft.Web/sites/slots/config",
             "name": "[concat(parameters('sites_TrainingAzureDevOpsWebApp_name'), '/', parameters('slots_Preprod_name'), '/', 'web')]",
             "apiVersion": "2016-08-01",
@@ -390,7 +384,6 @@
             ]
         },
         {
-            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps/providers/Microsoft.Web/sites/trainingazuredevopswebapp/slots/Preprod/hostNameBindings/trainingazuredevopswebapp-preprod.azurewebsites.net'.",
             "type": "Microsoft.Web/sites/slots/hostNameBindings",
             "name": "[concat(parameters('sites_TrainingAzureDevOpsWebApp_name'), '/', parameters('slots_Preprod_name'), '/', variables('hostNameBindings_trainingazuredevopswebapp_preprod.azurewebsites.net_name'))]",
             "apiVersion": "2016-08-01",
