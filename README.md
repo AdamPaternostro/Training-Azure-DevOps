@@ -123,7 +123,7 @@ We will be using the visual interface
 10. Save and Run a release
    - You can quickly make new environments onces you have your Dev pipeline working
 
-## Create Production Release
+### Create Production Release
 1. Edit the release pipeline
 2. Clone QA
 3. Rename to Prod
@@ -137,7 +137,7 @@ We will be using the visual interface
 11. Delete the Swap Slots task
 12. Save and Run a release
 
-# Add condtions
+### Add condtions
 1. Added a variable called DeployARMTemplate and set the value to false
 2. For each stage
    - Enable the ARM template
@@ -148,7 +148,7 @@ We will be using the visual interface
 3. Save and Run a release
    - You should see the ARM template skipped
 
-# Add approvals
+### Add approvals
 1. Edit the release pipeline
 2. Click on the person icon on the right side of the Dev stage
 3. Enable "Post-deployment approvals"
@@ -160,7 +160,7 @@ We will be using the visual interface
    You can approve on https://dev.azure.com or click on the email
 
 
-# Change the code and enable automatic builds
+### Change the code and enable automatic builds/releases
 1. Edit the Build defination
 2. Click on Triggers
 3. Click the "Enable continuous integration" checkbox
@@ -182,9 +182,9 @@ We will be using the visual interface
 12. Save the file
    - The build should kick off automatically (click on bulids)
    - The release should kick off automatically (click on releases when build is done)
+   - You can verify the new code is moving through environments by viewing the websites (the prod slot witll have the changes,the old site will be in the preprod slot)
 
-
-# Do QA in parallel (just to demo)
+### Do QA in parallel (just to demo)
 
 Create Azure function
 Create gate
@@ -198,5 +198,28 @@ Push to container registry
 Publish to Linux App
 
 
+## Notes / Best Practices
+- I usually name my resource groups with a "-DEV", "-QA" and "-PROD".  Naming your items accordingly will make creating new environments easy.  Also, if you want to deploy to many Azure Regions see: https://github.com/AdamPaternostro/Azure-Dual-Region-Deployment-Approach
+
+- The DevOps team and developers should work together to build the original pipeline.  Developers needs to understand what they need to expose as "variables" to the CI/CD engine.
+
+## How I do DevOps on my projects
+1. Create a resource group named MyProject-PoC (this is my playground)
+2. Create my Azure resources by hand and do some testing (change / delete resources)
+3. Create a Hello World app that has all my tiers (make sure the App works)
+Add security to my Hello World app to all my tiers (pass security between tiers)
+4. Export my ARM template from the Azure Portal
+5. Edit my ARM template.  Create parameters for everything.
+6. Run my ARM template and create a new resource group called MyProject-DEV (all my resources will have a –DEV suffix)
+7. Run my application and make sure it works just like step 4. Repeat Steps 6, 7 and 8 over and over!
+8. The code and ARM template should now be in source control
+9. Create a build definition
+10. Create a release definition
+11. Run it.  Make sure it works.  Repeat steps 10, 11 and 12 over and over!
+12. Delete my MyProject-POC since everything should now be automated.
+13. Create a QA and Prod pipeline by cloning the Dev pipeline (they should use a suffix of –QA and –PROD)
+14. Now code!
+15. Implement Logging, Error handling and Monitoring
+16. Make minor adjustments to my CI/CD pipeline.
 
 
