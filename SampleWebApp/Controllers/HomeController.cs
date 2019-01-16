@@ -12,6 +12,16 @@ namespace SampleWebApp.Controllers
     {
         public IActionResult Index()
         {
+            if (System.Environment.GetEnvironmentVariable("Environment") == null)
+            {
+                ViewData["Environment"] = "Environment (Environment) Not Set";
+            }
+            else
+            {
+                ViewData["Environment"] = System.Environment.GetEnvironmentVariable("Environment");
+            }
+            ViewData["ServerName"] = System.Environment.MachineName;
+
             return View();
         }
 
