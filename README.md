@@ -42,7 +42,7 @@ We will be using the visual interface
 6. Select Default version: Latest
 7. Click on Variables at the top
 8. Add variables
-   - Environment -> DEV
+   - Environment -> DEV  (Note if you are working with several people all sharing a resource group them make this DEV-{yourname})
    - AppServicePlan -> TrainingAzureDevOpsAppServicePlan (you can specify what you like - must be globally unique in Azure)
    - WebApp -> TrainingAzureDevOpsWebApp (you can specify what you like - must be globally unique in Azure)
    - ResourceGroup -> Training-Azure-DevOps
@@ -107,7 +107,7 @@ We will be using the visual interface
    - Set the subscription
    - Set the App Service name: $(WebApp)-$(Environment)
    - Set the Resource Group: $(ResourceGroup)
-   - Set the Source Slot: Preprod
+   - Set the Source Slot: Preprod)   
 4. Save and Run a release
 
 ### Create QA Release
@@ -192,7 +192,8 @@ We will be using the visual interface
 5. Edit the Prod stage
 6. Clone the ARM task
    - Edit Template path (e.g. $(System.DefaultWorkingDirectory)/_Training-Azure-DevOps-Build/drop/arm-function-template.json)
-   - Edit the Override template parameters (NOTE: You might need to change the storage account name)
+   - Edit the Override template parameters 
+      - NOTE: You might need to change the storage account name to be unique
      ```
      -AzureFunctionPlanName $(AppServicePlan)-Function-$(Environment) -AzureFunctionAppName $(WebApp)-Function-$(Environment)  -AzureFunctionStorageAccountName functionappstorage001
      ```
@@ -200,6 +201,10 @@ We will be using the visual interface
    - Change App Type to Function App
    - Uncheck deploy to slot
    - Change the Package / Folder path (e.g. $(System.DefaultWorkingDirectory)/_Training-Azure-DevOps-Build/drop/AzureFunction-Code.zip)
+      - The code has been zipped up for your convience
+8. Change the variable DeployARMTemplate to "true" (since we have a new ARM template). You can disable the approvals as well to save time.     
+9. Save and run to make sure things are working, you should also check to make sure the Function App was deployed      
+10. Change the variable DeployARMTemplate to "false" if things worked
 
 ### Do QA in parallel (just to demo)
 
