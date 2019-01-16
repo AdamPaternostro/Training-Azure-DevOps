@@ -1,0 +1,410 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sites_TrainingAzureDevOpsWebApp_name": {
+            "defaultValue": "TrainingAzureDevOpsWebApp",
+            "type": "String"
+        },
+        "serverfarms_TrainingAzureDevOpsAppServicePlan_name": {
+            "defaultValue": "TrainingAzureDevOpsAppServicePlan",
+            "type": "String"
+        },
+        "slots_Preprod_name": {
+            "defaultValue": "Preprod",
+            "type": "String"
+        }
+    },
+    "variables": {
+        "hostNameBindings_trainingazuredevopswebapp.azurewebsites.net_name": "[concat(toLower(parameters('sites_TrainingAzureDevOpsWebApp_name')), '.azurewebsites.net')]",
+        "hostNameBindings_trainingazuredevopswebapp_preprod.azurewebsites.net_name": "[concat(toLower(parameters('sites_TrainingAzureDevOpsWebApp_name')), '-preprod.azurewebsites.net')]"
+    },
+    "resources": [
+        {
+            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps/providers/Microsoft.Web/serverfarms/TrainingAzureDevOpsAppServicePlan'.",
+            "type": "Microsoft.Web/serverfarms",
+            "sku": {
+                "name": "S1",
+                "tier": "Standard",
+                "size": "S1",
+                "family": "S",
+                "capacity": 1
+            },
+            "kind": "app",
+            "name": "[parameters('serverfarms_TrainingAzureDevOpsAppServicePlan_name')]",
+            "apiVersion": "2016-09-01",
+            "location": "East US",
+            "scale": null,
+            "properties": {
+                "name": "[parameters('serverfarms_TrainingAzureDevOpsAppServicePlan_name')]",
+                "workerTierName": null,
+                "adminSiteName": null,
+                "hostingEnvironmentProfile": null,
+                "perSiteScaling": false,
+                "reserved": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps/providers/Microsoft.Web/sites/TrainingAzureDevOpsWebApp'.",
+            "type": "Microsoft.Web/sites",
+            "kind": "app",
+            "name": "[parameters('sites_TrainingAzureDevOpsWebApp_name')]",
+            "apiVersion": "2016-08-01",
+            "location": "East US",
+            "scale": null,
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('sites_TrainingAzureDevOpsWebApp_name'),'trainingazuredevopswebapp.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "virtualIP": null,
+                        "thumbprint": null,
+                        "toUpdate": null,
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('sites_TrainingAzureDevOpsWebApp_name'),'trainingazuredevopswebapp.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "virtualIP": null,
+                        "thumbprint": null,
+                        "toUpdate": null,
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_TrainingAzureDevOpsAppServicePlan_name'))]",
+                "reserved": false,
+                "siteConfig": null,
+                "scmSiteAlsoStopped": false,
+                "hostingEnvironmentProfile": null,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "cloningInfo": null,
+                "httpsOnly": false
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_TrainingAzureDevOpsAppServicePlan_name'))]"
+            ]
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps/providers/Microsoft.Web/sites/TrainingAzureDevOpsWebApp/config/web'.",
+            "type": "Microsoft.Web/sites/config",
+            "name": "[concat(parameters('sites_TrainingAzureDevOpsWebApp_name'), '/', 'web')]",
+            "apiVersion": "2016-08-01",
+            "location": "East US",
+            "scale": null,
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "phpVersion": "5.6",
+                "pythonVersion": "",
+                "nodeVersion": "",
+                "linuxFxVersion": "",
+                "windowsFxVersion": null,
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "remoteDebuggingVersion": null,
+                "httpLoggingEnabled": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "[concat('$TrainingAzureDevOpsWebApp')]",
+                "publishingPassword": null,
+                "appSettings": null,
+                "azureStorageAccounts": {},
+                "metadata": null,
+                "connectionStrings": null,
+                "machineKey": null,
+                "handlerMappings": null,
+                "documentRoot": null,
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": false,
+                "javaVersion": null,
+                "javaContainer": null,
+                "javaContainerVersion": null,
+                "appCommandLine": "",
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false,
+                        "virtualDirectories": null
+                    }
+                ],
+                "winAuthAdminState": 0,
+                "winAuthTenantState": 0,
+                "customAppPoolIdentityAdminState": false,
+                "customAppPoolIdentityTenantState": false,
+                "runtimeADUser": null,
+                "runtimeADUserPassword": null,
+                "loadBalancing": "LeastRequests",
+                "routingRules": [],
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "limits": null,
+                "autoHealEnabled": false,
+                "autoHealRules": null,
+                "tracingOptions": null,
+                "vnetName": "",
+                "siteAuthEnabled": false,
+                "siteAuthSettings": {
+                    "enabled": null,
+                    "unauthenticatedClientAction": null,
+                    "tokenStoreEnabled": null,
+                    "allowedExternalRedirectUrls": null,
+                    "defaultProvider": null,
+                    "clientId": null,
+                    "clientSecret": null,
+                    "clientSecretCertificateThumbprint": null,
+                    "issuer": null,
+                    "allowedAudiences": null,
+                    "additionalLoginParams": null,
+                    "isAadAutoProvisioned": false,
+                    "googleClientId": null,
+                    "googleClientSecret": null,
+                    "googleOAuthScopes": null,
+                    "facebookAppId": null,
+                    "facebookAppSecret": null,
+                    "facebookOAuthScopes": null,
+                    "twitterConsumerKey": null,
+                    "twitterConsumerSecret": null,
+                    "microsoftAccountClientId": null,
+                    "microsoftAccountClientSecret": null,
+                    "microsoftAccountOAuthScopes": null
+                },
+                "cors": null,
+                "push": null,
+                "apiDefinition": null,
+                "autoSwapSlotName": null,
+                "localMySqlEnabled": false,
+                "managedServiceIdentityId": null,
+                "xManagedServiceIdentityId": null,
+                "ipSecurityRestrictions": null,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "ftpsState": "AllAllowed",
+                "reservedInstanceCount": 0
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_TrainingAzureDevOpsWebApp_name'))]"
+            ]
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps/providers/Microsoft.Web/sites/TrainingAzureDevOpsWebApp/hostNameBindings/trainingazuredevopswebapp.azurewebsites.net'.",
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "name": "[concat(parameters('sites_TrainingAzureDevOpsWebApp_name'), '/', variables('hostNameBindings_trainingazuredevopswebapp.azurewebsites.net_name'))]",
+            "apiVersion": "2016-08-01",
+            "location": "East US",
+            "scale": null,
+            "properties": {
+                "siteName": "TrainingAzureDevOpsWebApp",
+                "domainId": null,
+                "hostNameType": "Verified"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_TrainingAzureDevOpsWebApp_name'))]"
+            ]
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps/providers/Microsoft.Web/sites/trainingazuredevopswebapp/slots/Preprod'.",
+            "type": "Microsoft.Web/sites/slots",
+            "kind": "app",
+            "name": "[concat(parameters('sites_TrainingAzureDevOpsWebApp_name'), '/', parameters('slots_Preprod_name'))]",
+            "apiVersion": "2016-08-01",
+            "location": "East US",
+            "scale": null,
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat('trainingazuredevopswebapp-preprod.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "virtualIP": null,
+                        "thumbprint": null,
+                        "toUpdate": null,
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat('trainingazuredevopswebapp-preprod.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "virtualIP": null,
+                        "thumbprint": null,
+                        "toUpdate": null,
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_TrainingAzureDevOpsAppServicePlan_name'))]",
+                "reserved": false,
+                "siteConfig": null,
+                "scmSiteAlsoStopped": false,
+                "hostingEnvironmentProfile": null,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "cloningInfo": null,
+                "httpsOnly": false
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_TrainingAzureDevOpsWebApp_name'))]",
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_TrainingAzureDevOpsAppServicePlan_name'))]"
+            ]
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps/providers/Microsoft.Web/sites/trainingazuredevopswebapp/slots/Preprod/config/web'.",
+            "type": "Microsoft.Web/sites/slots/config",
+            "name": "[concat(parameters('sites_TrainingAzureDevOpsWebApp_name'), '/', parameters('slots_Preprod_name'), '/', 'web')]",
+            "apiVersion": "2016-08-01",
+            "location": "East US",
+            "scale": null,
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "phpVersion": "5.6",
+                "pythonVersion": "",
+                "nodeVersion": "",
+                "linuxFxVersion": "",
+                "windowsFxVersion": null,
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "remoteDebuggingVersion": "VS2017",
+                "httpLoggingEnabled": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "[concat('$trainingazuredevops', 'web','app__Preprod')]",
+                "publishingPassword": null,
+                "appSettings": null,
+                "azureStorageAccounts": {},
+                "metadata": null,
+                "connectionStrings": null,
+                "machineKey": null,
+                "handlerMappings": null,
+                "documentRoot": null,
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": false,
+                "javaVersion": null,
+                "javaContainer": null,
+                "javaContainerVersion": null,
+                "appCommandLine": "",
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false,
+                        "virtualDirectories": null
+                    }
+                ],
+                "winAuthAdminState": 0,
+                "winAuthTenantState": 0,
+                "customAppPoolIdentityAdminState": false,
+                "customAppPoolIdentityTenantState": false,
+                "runtimeADUser": null,
+                "runtimeADUserPassword": null,
+                "loadBalancing": "LeastRequests",
+                "routingRules": [],
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "limits": null,
+                "autoHealEnabled": false,
+                "autoHealRules": null,
+                "tracingOptions": null,
+                "vnetName": "",
+                "siteAuthEnabled": false,
+                "siteAuthSettings": {
+                    "enabled": null,
+                    "unauthenticatedClientAction": null,
+                    "tokenStoreEnabled": null,
+                    "allowedExternalRedirectUrls": null,
+                    "defaultProvider": null,
+                    "clientId": null,
+                    "clientSecret": null,
+                    "clientSecretCertificateThumbprint": null,
+                    "issuer": null,
+                    "allowedAudiences": null,
+                    "additionalLoginParams": null,
+                    "isAadAutoProvisioned": false,
+                    "googleClientId": null,
+                    "googleClientSecret": null,
+                    "googleOAuthScopes": null,
+                    "facebookAppId": null,
+                    "facebookAppSecret": null,
+                    "facebookOAuthScopes": null,
+                    "twitterConsumerKey": null,
+                    "twitterConsumerSecret": null,
+                    "microsoftAccountClientId": null,
+                    "microsoftAccountClientSecret": null,
+                    "microsoftAccountOAuthScopes": null
+                },
+                "cors": null,
+                "push": null,
+                "apiDefinition": null,
+                "autoSwapSlotName": null,
+                "localMySqlEnabled": false,
+                "managedServiceIdentityId": null,
+                "xManagedServiceIdentityId": null,
+                "ipSecurityRestrictions": null,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "ftpsState": "AllAllowed",
+                "reservedInstanceCount": 0
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_TrainingAzureDevOpsWebApp_name'))]",
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_TrainingAzureDevOpsWebApp_name'), parameters('slots_Preprod_name'))]"
+            ]
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/64a14e46-6c7d-4063-9665-c295287ab709/resourceGroups/Training-Azure-DevOps/providers/Microsoft.Web/sites/trainingazuredevopswebapp/slots/Preprod/hostNameBindings/trainingazuredevopswebapp-preprod.azurewebsites.net'.",
+            "type": "Microsoft.Web/sites/slots/hostNameBindings",
+            "name": "[concat(parameters('sites_TrainingAzureDevOpsWebApp_name'), '/', parameters('slots_Preprod_name'), '/', variables('hostNameBindings_trainingazuredevopswebapp_preprod.azurewebsites.net_name'))]",
+            "apiVersion": "2016-08-01",
+            "location": "East US",
+            "scale": null,
+            "properties": {
+                "siteName": "trainingazuredevopswebapp(Preprod)",
+                "domainId": null,
+                "hostNameType": "Verified"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_TrainingAzureDevOpsWebApp_name'))]",
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_TrainingAzureDevOpsWebApp_name'), parameters('slots_Preprod_name'))]"
+            ]
+        }
+    ]
+}
