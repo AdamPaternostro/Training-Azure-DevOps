@@ -208,41 +208,113 @@ We will be using the visual interface
 9. Change the variable DeployARMTemplate to "true" (since we have a new ARM template). You can disable the approvals as well to save time.     
 10. Save and run to make sure things are working, you should also check to make sure the Function App was deployed      
 11. Change the variable DeployARMTemplate to "false" if things worked
+12. Go to the Function App in the Azure Portal and copy the URL / security code
+13. Click on the Lightning bolt of the Prod Swap stage
+    - Enable a gate
+    - Enter the function url (e.g. https://trainingazuredevopswebapp-function-prod.azurewebsites.net/api/AzureDevOpsFunctionGate)
+    - Enter the code (e.g. kw99xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=)
+    - Under advanced for Success Criteria enter "eq(root['status'], 'true')"
+    - NOTE: If you have an apporval you can check the box "On successfuly gates, ask for approvals", this means your gate will be evaluated first and must be successful before asking for an approval
+    - You can change the evaluation times as well for testing
+14. Save and Run a release
+    - You can watch the gate perform its test
+    
 
-### Do QA in parallel (just to demo)
 
 ### To Do
-Create gate
 Create Azure container registry
 Create Azure Linux Web App
-Import code
 Build Docker
 Push to container registry
 Publish to Linux App
 
+## Notes 
+- If your web app gets a DLL locked, then add a task to restart the staging slot web app
 
-## Notes / Best Practices
+- Some customers like to tear down the staging slot after deployments.  You can add this part of your pipeline.  I usually wait 1 to 2 hours before tearing down staging since if something goes wrong with the release your can quick swap slots.  You can add a step to perform the delete after a certain amount of time (e.g. Gate or an appoval with a deferred time). 
+
+- My preprod staging slot is pointing to production resources and production databases
+
+- If you are using Web Apps and use Slot specific variables be-aware that after your slot swap the appliction must recycle to load the values!  This negates most of the benefits of slots.  If your application has a quick warm up time for the first call, you might be alreay, but if not, your users can see a delay.
+
+- If your web app is event based, for instance an Azure Function that triggers based upon a blob, then when you deploy to a the preprod staging slot, this function is processing production data!
+   - How do you handle this?  For a blob trigger, if your preprod slot picks up the blob, it is not like it can pass the event to the production slot.  You also cannot have the production slot monitoring one container and preprod monitoring a different one.  
+   - My perference for all event driven logic, have an Azure function that places items in a queue (or just place the item in the queue to begin with).  Then process the queue only if you are in the production slot.  You can test the URL of the application in some cases (not if you are directing 90% of your traffic the production slot and 10% to staging).  Having an application configuraiton value will not help since when you swap slots the value will not change.  I worry about missing events - especailly when new code is being deployed for an event based process.
+
+
+## Best Practices
 - I usually name my resource groups with a "-DEV", "-QA" and "-PROD".  Naming your items accordingly will make creating new environments easy.  Also, if you want to deploy to many Azure Regions see: https://github.com/AdamPaternostro/Azure-Dual-Region-Deployment-Approach
 
 - The DevOps team and developers should work together to build the original pipeline.  Developers needs to understand what they need to expose as "variables" to the CI/CD engine.
+
+- I have all my application setup for 24/7 deployments.  This means that I can deploy at anytime without the need for downtime.  The cloud makes this "easy" by providing the abilty to stand up the next version of your application, smoke test it and then swap to production.  My goal is to have the business users approve the releases to QA and Production.  To support this, along with CI/CD, please review: https://github.com/AdamPaternostro/Azure-Dev-Ops-Single-CI-CD-Dev-To-Production-Pipeline.  This shows how you can have a single pipeline from Dev to Prod while using CI/CD releases to Dev.
+
+
+## Database DevOps (Schema Changes)
+If you have a database as part of your application
+1. You should deploy your database schema changes before deploying your application
+2. Database schema changes should NOT break your current application
+   - No dropping of columns, tables, stored procedures, etc.
+   - If you add a column, it must have a default value
+   - If you add a parameter to a stored procedure, it must have a default value
+3. When you need to drop an item (e.g. Table)   
+   - If your current code release is version 1.0 and then next release is version 1.1
+   - Do not drop the table in v1.1 deployment
+   - When you deploy your v1.1 code to the preprod slot the production slot will have v1.0, so BOTH v1.0 and v1.1 will be running and using the same database schema. 
+   - Drop the table in the v1.2 release since v1.1 will be in the production slot and v1.2 will go to preprod and netiher release relies on the dropped table
+4. If you have seed data (e.g. states table or zipcode table, etc.)   
+   - Create a stored procedure called "InitializeDatabase"
+   - This procedure should be very robust/idempotent
+      - IF NOT EXISTS(SELECT 1 FROM myTABLE WHERE id = 10) THEN INSERT...
+   - When your code starts up (or part of Dev Ops), you should call this procedure
+   - By placing all your look up values in a stored procedure, the stored procedure should be under source control (yes, you should be using database source control)
+
+
+## Database DevOps (Data Updates)
+- For minor data updates you can run these as part of the "InitializeDataUpdate" stored prodcedure much like the "InitializeDatabase".  This procedure can do tests like, if all values in a column is NULL then seed the value.
+- For large data changes, like changing all the values of a lookup table used in calcuations, you can backup the table and then update the entire table.  If this is millions of rows and takes a long time, you can backup the database (the cloud does this for you), then issue the update.  I currently do not have a good DevOps way of hanlding this.  It is mainly manual since some updates might take hours.  Rolling back is hard since you might be looking at a restore and copy data.
+
+
+## Azure Resource DevOps
+- With the cloud, your code should create all the items within a resource.
+- Your infrastructure as code should create the Azure Storage account
+- Your code should create all the blob containers, queues, tables, etc. 
+- The goal of your code should be that you can compile and run without any prerequisites!  This way you can spin up new environments quickly and without a person creating a bunch of required dependencies.
+
+
+## Beware of ourside shared resources
+- If you code uses a file in blob storage, lets say it if a PDF file with fields that need to be populate by your code
+- If you need to update this file and are using the staging slot technique then when you deploy to staging, this file will mostlikely be updated.  The issue is the current production code is now using an updated file.
+- Try to keep these dependecies as part of your project
+
+
+## Configuration values
+- I have mainly given up on updating a application configuration value when an application is running in production.  You should have some configuration values as part of the application settings (e.g. environment variables).  If you need to update a value, I perfer to push out a whole new release.  
+- My code typically loads the configuration values at runtime.  The code does not get these values from application settings.  The code loads the values from something like KeyVault.  I usually have my configuration values named "DatabaseConnectionString-{Environment}" and I get the ENVIRONMENT variable from my settings and then load based upon the string.  This means my code is really dependent on just a single application setting variable named ENVIRONMENT. This avoids having all the configuration values as part of my Dev Ops process.
+
+
+
+## RDP / SSH access
+- If you do your DevOps process correctly you should never allow RDP or SSH access to a machine in QA or Production. Dev is okay for troubleshoot some items, but I have not remoted to a production machine in many years.
+
 
 ## How I do DevOps on my projects
 1. Create a resource group named MyProject-PoC (this is my playground)
 2. Create my Azure resources by hand and do some testing (change / delete resources)
 3. Create a Hello World app that has all my tiers (make sure the App works)
-Add security to my Hello World app to all my tiers (pass security between tiers)
-4. Export my ARM template from the Azure Portal
-5. Edit my ARM template.  Create parameters for everything.
+4. Add security to my Hello World app to all my tiers (pass security between tiers)
+5. Export my ARM template from the Azure Portal Edit my ARM template.  Create parameters for everything.
 6. Run my ARM template and create a new resource group called MyProject-DEV (all my resources will have a –DEV suffix)
-7. Run my application and make sure it works just like step 4. Repeat Steps 6, 7 and 8 over and over!
-8. The code and ARM template should now be in source control
-9. Create a build definition
-10. Create a release definition
-11. Run it.  Make sure it works.  Repeat steps 10, 11 and 12 over and over!
-12. Delete my MyProject-POC since everything should now be automated.
-13. Create a QA and Prod pipeline by cloning the Dev pipeline (they should use a suffix of –QA and –PROD)
-14. Now code!
-15. Implement Logging, Error handling and Monitoring
-16. Make minor adjustments to my CI/CD pipeline.
+7. Run my application and make sure it works just like step 4. 
+8. Repeat Steps 6 and 7 over and over!
+9. The code and ARM template should now be in source control
+10. Create a build definition
+11. Create a release definition
+12. Run it.  Make sure it works.  
+13. Delete my MyProject-POC since everything should now be automated.
+14. Create a QA and Prod pipeline by cloning the Dev pipeline (they should use a suffix of –QA and –PROD)
+15. Now code!
+16. Implement Logging, Error handling and Monitoring
+17. Make minor adjustments to my CI/CD pipeline.
 
 
