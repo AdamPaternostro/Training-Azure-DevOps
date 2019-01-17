@@ -1,0 +1,29 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "ACR_Name": {
+            "defaultValue": "TrainingAzureDevOpsACR",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+             "type": "Microsoft.ContainerRegistry/registries",
+            "sku": {
+                "name": "Standard",
+                "tier": "Standard"
+            },
+            "name": "[toLower(parameters('ACR_Name'))]",
+            "apiVersion": "2017-10-01",
+            "location": "eastus",
+            "tags": {},
+            "scale": null,
+            "properties": {
+                "adminUserEnabled": false
+            },
+            "dependsOn": []
+        }
+    ]
+}

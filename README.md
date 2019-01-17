@@ -17,7 +17,13 @@ This lab/walkthrough shows how to create a build and release pipeline that demos
   - Uses conditions
   - Uses cloning to quickly duplicate environments
   - Uses gates
-
+- Create a build defination for a Docker Image
+  - Builds the image
+  - Pushed to an Azure Container Registry
+- Create a release defination for a Docker Image
+  - Creates an Azure Container Registry
+  - Creates a Linux Web App
+  - Releases the Docker image
 
 ### Azure Setup
 1. Create a resource group in Azure named: Training-Azure-DevOps
@@ -308,7 +314,7 @@ If you have a database as part of your application
 
 
 ## Configuration values
-- I have mainly given up on updating a application configuration value when an application is running in production.  You should have some configuration values as part of the application settings (e.g. environment variables).  If you need to update a value, I perfer to push out a whole new release.  
+- I have mainly given up on updating an application configuration value when an application is running in production.  You should have some configuration values as part of the application settings (e.g. environment variables).  If you need to update a value, I perfer to push out a whole new release.  
 - My code typically loads the configuration values at runtime.  The code does not get these values from application settings.  The code loads the values from something like KeyVault.  I usually have my configuration values named "DatabaseConnectionString-{Environment}" and I get the ENVIRONMENT variable from my settings and then load based upon the string.  This means my code is really dependent on just a single application setting variable named ENVIRONMENT. This avoids having all the configuration values as part of my Dev Ops process.
 
 
@@ -338,9 +344,73 @@ If you have a database as part of your application
 
 
 
-### To Do
-Create Azure container registry
-Create Azure Linux Web App
-Build Docker
-Push to container registry
-Publish to Linux App
+
+
+
+
+
+## Deploy Azure Container Registry
+### Create a build
+1. Disable automatitic builds for pipeline
+2. Create a new Build Defination and select "Docker task"
+3. Disable BOTH Docker tasks for now
+4. Add a Copy File task
+   - Source folder: Sample-Docker-ARM-Templates
+   - Target folder: $(Build.ArtifactStagingDirectory)
+5. Add a Publish task  
+6. Save and Queue
+Check you build artifacts
+
+### Create a Release
+1. Create a new release pipeline
+2. Select Empty job
+3. Link your Artifacts
+4. Add variables
+   - Environment -> DEV  (Note if you are working with several people all sharing a resource group them make this DEV-{yourname})
+   - AppServicePlan -> TrainingAzureDevOpsLinuxPlan (you can specify what you like - must be globally unique in Azure)
+   - WebApp -> TrainingAzureDevOpsLinuxApp (you can specify what you like - must be globally unique in Azure)
+   - ResourceGroup -> Training-Azure-DevOps-Docker
+   - ACR_Name -> TrainingAzureDevOpsContainerReg
+   - DockerImageName -> TrainingAzureDevOpsApp
+5. Add a task Azure Resource Group Deployment
+   - Select your subscription
+   - Set resource group to $(ResourceGroup)
+   - Set Location to "East US"
+   - Set Override template parameters
+   ```
+   -ACR_Name $(ACR_Name)-$(Environment)
+   ```
+6. Save and then Queue
+Verifiy you have an ACR created
+
+
+### Update Build
+1. Re-enable both Docker tasks
+2. Edit the Build an Image task
+   - Select Container Registry Type: Azure Container Registry
+   - Select Subscription
+   - Select the Azure Container Registry
+   - Note the image name: $(Build.Repository.Name):$(Build.BuildId)
+3. Edit Push an image task
+
+4. Save and Queue
+Verify you have the Docker image in your ACR
+
+
+### Update Release
+1. Clone the ARM task
+   - Select the arm-template-web.json for the template file
+   - Set the OVerride template parameters
+   ```
+   -sites_azuretrainingdockerimageapp_name $(WebApp)-$(Environment) -serverfarms_azuretrainingdockerimageappservice_name $(AppServicePlan)-$(Environment) -ACR_Name $(ACR_Name)$(Environment) -DockerImageName $(Build.Repository.Name) -DockerTag $(Build.BuildId)
+   ```
+2. Save
+3. Queue
+
+
+### Notes
+- You have to create your ACR first
+- We are not using the "latest" tag for our Docker images, we us the build number
+- You must run the ARM template for the web app to update the build number for the docker image tag
+- For best Docker build performance use your own agent so you do not need to rebuild every layer (which will happen on a hosted agent)
+
