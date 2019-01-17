@@ -1,5 +1,22 @@
 # Training-Azure-DevOps
-Using Azure Dev Ops to deploy Infrastructure as Code, Web application, Staging Slots and Docker images.
+This lab/walkthrough shows how to create a build and release pipeline that demostrates:
+- Infrastructure as Code
+  - Deploys an App Service
+  - Deploys a Web App
+  - Deploys a Function App (consumption plan using v2)
+- Creates a build defination with CI
+  - Builds code
+  - Zips an Azure Function
+  - Publishes code
+- Create a release defination with CD
+  - Deploys an ARM template
+  - Uses Variables
+  - Deploys a web app
+  - Swap web app slots
+  - Uses approvals
+  - Uses conditions
+  - Uses cloning to quickly duplicate environments
+  - Uses gates
 
 
 ### Azure Setup
@@ -7,13 +24,16 @@ Using Azure Dev Ops to deploy Infrastructure as Code, Web application, Staging S
 2. Create a service principle in Azure named (web/api): Training-Azure-DevOps-SP
 3. Grant the service principle contributor access to the resource group
 
+
 ### Azure DevOps Setup
 1. Create an Azure DevOps project named: Training-Azure-DevOps
+
 
 ### Open Azure DevOps
 1. Click on Repos | Files
 2. Click on Import under "or import a Repository"
 3. Enter: https://github.com/AdamPaternostro/Training-Azure-DevOps.git
+
 
 ### Create a build defination
 We will be using the visual interface
@@ -25,6 +45,7 @@ We will be using the visual interface
 6. Click Save & Queue (make sure it works)
 7. Click on the Artifacts button.  You should see a zip.
 
+
 ### Alter build defination
 1. Add a Copy File task (click +)
 2. Move it abovethe Publish Artifact task
@@ -32,6 +53,7 @@ We will be using the visual interface
 3. Set target folder: $(build.artifactstagingdirectory)
 4. Build again
 5. View artifacts and you should see arm-template.json in the artifacts
+
 
 ### Create a Release pipeline (Deploy ARM Template)
 1. Click on Pipelines | Releases | New Pipeline button
@@ -52,29 +74,32 @@ We will be using the visual interface
 12. Add a task (click +)
 13. Select "Azure Resource Group Deployment"
 14. Click on tasks
-   - Click the manage link next to "Azure Subscription"
-   - Click on New Service Connection
-   - Click on Azure Resource Manager
-   - Click on User full version of this dialog (link at bottom)
-   - Give it a name
-   - Enter the Service Principle Id (Application Id)
-   - Enter the Key
-   - Test the connection
-   - If you get an error make sure the service principle exists and has Contributor access to your resource group
-   - Close the tab and return to your pipeline
-   - Click the refresh button next to Azure Subscription
-   - Select the connection you just setup
-   - Enter the resource group name: $(ResourceGroup)  (Typically I append the Environment name "DEV" to it, but for most enterprises resource groups are created by IT)
-   - Pick your location (I keep mine the same as my resource group)
-   - Pick your template "arm-template.json"
-   - Leave parameters blank, we do not have a parameters file
-   - In "Override template parameters" enter: 
-     -serverfarms_TrainingAzureDevOpsAppServicePlan_name $(AppServicePlan)-$(Environment) -sites_TrainingAzureDevOpsWebApp_name $(WebApp)-$(Environment)  
-   - Leave Deployment Mode as Incremental (this is very important as Complete will remove unused resources which can do things like delete a storage account)
+    - Click the manage link next to "Azure Subscription"
+    - Click on New Service Connection
+    - Click on Azure Resource Manager
+    - Click on User full version of this dialog (link at bottom)
+    - Give it a name
+    - Enter the Service Principle Id (Application Id)
+    - Enter the Key
+    - Test the connection
+    - If you get an error make sure the service principle exists and has Contributor access to your resource group
+    - Close the tab and return to your pipeline
+    - Click the refresh button next to Azure Subscription
+    - Select the connection you just setup
+    - Enter the resource group name: $(ResourceGroup)  (Typically I append the Environment name "DEV" to it, but for most enterprises resource groups are created by IT)
+    - Pick your location (I keep mine the same as my resource group)
+    - Pick your template "arm-template.json"
+    - Leave parameters blank, we do not have a parameters file
+    - In "Override template parameters" enter: 
+      ```
+      -serverfarms_TrainingAzureDevOpsAppServicePlan_name $(AppServicePlan)-$(Environment) -sites_TrainingAzureDevOpsWebApp_name $(WebApp)-$(Environment)  
+      ```
+    - Leave Deployment Mode as Incremental (this is very important as Complete will remove unused resources which can do things like delete a storage account)
 15. Save
 16. Click on Release | Create a Release
    - You can click the Release-1 link to view the release
    - You can view the resources being created in the Azure Portal
+
 
 ### Release pipeline (Deploy Code)
 1. Edit the release pipeline
@@ -88,6 +113,7 @@ We will be using the visual interface
 5. Save and Run a release
 6. After the release open the website (e.g. https://trainingazuredevopswebapp-dev.azurewebsites.net/)
 
+
 ### Release pipeline (Deploy to slot)
 1. Edit the release pipeline
 2. Edit the Web App Deployment
@@ -99,6 +125,7 @@ We will be using the visual interface
    - e.g. https://trainingazuredevopswebapp-dev.azurewebsites.net/
    - e.g. https://trainingazuredevopswebapp-dev-PREPROD.azurewebsites.net/
 6. You will notice the ServerName is the same (both apps are on the same server)
+
 
 ### Release pipeline (Swap slot)
 1. Edit the release pipeline
@@ -220,14 +247,6 @@ We will be using the visual interface
     - You can watch the gate perform its test
     
 
-
-### To Do
-Create Azure container registry
-Create Azure Linux Web App
-Build Docker
-Push to container registry
-Publish to Linux App
-
 ## Notes 
 - If your web app gets a DLL locked, then add a task to restart the staging slot web app
 
@@ -318,3 +337,10 @@ If you have a database as part of your application
 17. Make minor adjustments to my CI/CD pipeline.
 
 
+
+### To Do
+Create Azure container registry
+Create Azure Linux Web App
+Build Docker
+Push to container registry
+Publish to Linux App
