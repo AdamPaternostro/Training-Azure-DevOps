@@ -14,6 +14,10 @@
             "defaultValue": "TrainingAzureDevOpsACR",
             "type": "String"
         },
+        "ACR_Password": {
+            "defaultValue": "SetMe",
+            "type": "String"
+        },
         "DockerImageName": {
             "defaultValue": "Unknown",
             "type": "String"
@@ -25,7 +29,7 @@
     },
     "variables": {
         "hostNameBindings_azuretrainingdockerimageapp.azurewebsites.net_name": "[concat(toLower(parameters('sites_azuretrainingdockerimageapp_name')), '.azurewebsites.net')]"
-     },
+    },
     "resources": [
         {
             "type": "Microsoft.Web/serverfarms",
@@ -82,7 +86,26 @@
                 ],
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_azuretrainingdockerimageappservice_name'))]",
                 "reserved": true,
-                "siteConfig": null,
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
+                            "value": "[parameters('ACR_Password')]"
+                        },
+                        {
+                            "name": "DOCKER_REGISTRY_SERVER_URL",
+                            "value": "[concat('https://',toLower(parameters('ACR_Name')),'.azurecr.io')]"
+                        },
+                        {
+                            "name": "DOCKER_REGISTRY_SERVER_USERNAME",
+                            "value": "[toLower(parameters('ACR_Name'))]"
+                        },
+                        {
+                            "name": "WEBSITES_PORT",
+                            "value": "8000"
+                        }
+                    ]
+                },
                 "scmSiteAlsoStopped": false,
                 "hostingEnvironmentProfile": null,
                 "clientAffinityEnabled": true,
@@ -120,7 +143,7 @@
                 "phpVersion": "",
                 "pythonVersion": "",
                 "nodeVersion": "",
-                "linuxFxVersion": "[concat('DOCKER|',toLower(parameters('ACR_Name')),'.azurecr.io/',parameters('DockerImageName'),':',parameters('DockerTag'))]",
+                "linuxFxVersion": "[concat('DOCKER|',toLower(parameters('ACR_Name')),'.azurecr.io/',toLower(parameters('DockerImageName')),':',parameters('DockerTag'))]",
                 "windowsFxVersion": null,
                 "requestTracingEnabled": false,
                 "remoteDebuggingEnabled": false,

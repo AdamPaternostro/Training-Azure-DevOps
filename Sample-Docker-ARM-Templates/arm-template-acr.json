@@ -21,7 +21,7 @@
             "tags": {},
             "scale": null,
             "properties": {
-                "adminUserEnabled": false
+                "adminUserEnabled": true
             },
             "dependsOn": []
         }
