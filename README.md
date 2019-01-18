@@ -341,4 +341,4 @@ Verify that the website is working
 
 
 # DevOps Best Practices
-https://github.com/AdamPaternostro/Training-Azure-DevOps/DevOps-Best-Practices.md
+https://github.com/AdamPaternostro/Training-Azure-DevOps/blob/master/DevOps-Best-Practices.md
