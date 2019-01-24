@@ -88,7 +88,7 @@ We will be using the visual interface
     - Click the manage link next to "Azure Subscription"
     - Click on New Service Connection
     - Click on Azure Resource Manager
-    - Click on User full version of this dialog (link at bottom)
+    - Click on "Use full version of this dialog" (link at bottom)
     - Give it a name
     - Enter the Service Principle Id (Application Id)
     - Enter the Service Principle Key
