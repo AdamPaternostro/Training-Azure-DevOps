@@ -47,7 +47,7 @@ This lab/walkthrough shows how to create a build and release pipeline that demos
 
 
 ### Create a build defination
-We will be using the visual interface
+We will be using the visual interface to create a build defination for a .NET core app
 1. Click on Pipelines | Builds
 2. Click on New Pipeline button
 3. Click on the small link "Use the visual designer"
@@ -58,15 +58,17 @@ We will be using the visual interface
 
 
 ### Alter build defination
-1. Add a Copy File task (click +)
+We will added additional files to our artifact store in Azure DevOps.  These files can be scripts, resources or anything you need when creating your release pipeline.
+1. Add a Copy Files task (click +) on the Agent
 2. Move it above the Publish Artifact task
 2. Set the Source folder: SampleWebApp-ARM-Templates
-3. Set the Target folder: $(build.artifactstagingdirectory)
+3. Set the Target folder: $(Build.ArtifactStagingDirectory)
 4. Build again
 5. View artifacts and you should see arm-template.json in the artifacts
 
 
 ### Create a Release pipeline (Deploy ARM Template)
+We not will create Azure resources (Infrastucture as Code).  This will create an App Service Plan, an App Service (your main Web App) and a slot (Web App).
 1. Click on Pipelines | Releases | New Pipeline button
 2. Click on Empty Job link (where it says Select a template)
 3. Rename Stage 1 to Dev and click the X to close
@@ -84,11 +86,11 @@ We will be using the visual interface
 11. Click on Dev Stage
 12. Add a task (click +)
 13. Select "Azure Resource Group Deployment"
-14. Click on tasks
+14. Click on the task
     - Click the manage link next to "Azure Subscription"
     - Click on New Service Connection
     - Click on Azure Resource Manager
-    - Click on "Use full version of this dialog" (link at bottom)
+    - Click on "Use the full version of the service connection dialog" (link at bottom)
     - Give it a name
     - Enter the Service Principle Id (Application Id)
     - Enter the Service Principle Key
@@ -99,6 +101,7 @@ We will be using the visual interface
     - Select the connection you just setup
     - Enter the resource group name: $(ResourceGroup)  
     - Pick your location (I keep mine the same as my resource group)
+       - You should make Location a variable and a parameter to your ARM template.  This is just "simplified" for the training.
     - Pick your template "arm-template.json"
     - Leave parameters blank, we do not have a parameters file
     - In "Override template parameters" enter: 
@@ -108,11 +111,12 @@ We will be using the visual interface
     - Leave Deployment Mode as Incremental (this is very important as Complete will remove unused resources which can do things like delete a storage account)
 15. Save
 16. Click on Release | Create a Release
-   - You can click the Release-1 link to view the release
+   - You can click the Release-1 link to view the release (click on logs to see the progress)
    - You can view the resources being created in the Azure Portal
 
 
 ### Release pipeline (Deploy Code)
+Now we want to deploy code (to the production slot).  We will deploy our sample web application and set an application setting that can be accessed as an environment variable.
 1. Edit the release pipeline
 2. Add a task to the Dev stage "Azure App Service Deploy"
 3. Edit the settings
@@ -122,23 +126,32 @@ We will be using the visual interface
    - Set the App Settings to "-Environment $(Environment)" under Application and Configuration Settings
 4. Disable the ARM deployment task (right click and disable). This is a time saver during development.
 5. Save and Run a release
-6. After the release open the website (e.g. https://trainingazuredevopswebapp-dev.azurewebsites.net/)
+6. After the release open the website 
+   - e.g. https://trainingazuredevopswebapp-dev.azurewebsites.net
+   - Note: The staging slot will be empty at this point. 
 
 
 ### Release pipeline (Deploy to slot)
+You never want to deploy to your production slot.  You should always deploy to a staging slot, warm up your app and then swap the application into the production slot.
 1. Edit the release pipeline
 2. Edit the Web App Deployment
 3. Click Deploy to Slot
    - Set resource group: $(ResourceGroup)
-   - Set Slot to: Proprod
+   - Set Slot to: Preprod
 4. Save and Run a release
 5. After the release open the websites 
    - e.g. https://trainingazuredevopswebapp-dev.azurewebsites.net/
    - e.g. https://trainingazuredevopswebapp-dev-PREPROD.azurewebsites.net/
 6. You will notice the ServerName is the same (both apps are on the same server)
 
+#### Notes (VERY IMPORTANT!)
+You will have ERRORS if you do not do this!  Your errors will happen when you swap your slots AND when you autoscale!  It all really depends on how long your application takes to warm-up.  If your application take 1 to 15 seconds to warm-up then you are probably fine.  If your application takes 15 seconds to 15 minutes (yes, some apps take 15 minutes), then you need to properly warm-up your application.
+- To warm up a Windows App Service: https://docs.microsoft.com/en-us/azure/app-service/deploy-staging-slots#custom-warm-up
+- To warm up a Linux App Service: https://github.com/AdamPaternostro/Azure-Web-App-Nginx-Reverse-Proxy-Dotnet-Core-Linux
+
 
 ### Release pipeline (Swap slot)
+We will now take the code in our preprod slot and swap to the production slot.
 1. Edit the release pipeline
 2. Add a task to the Dev stage "Azure App Service Manage"
 3. Edit the settings
@@ -149,9 +162,10 @@ We will be using the visual interface
 4. Save and Run a release
 
 ### Create QA Release
+Once you have your Dev deployment up and running you can quickly create new environments by cloning your stage and using scoped variables.
 1. Edit the release pipeline
 2. Edit variables
-3. Change Environment variable Scope to DEV
+3. Change Environment variable Scope to DEV (just the one variable)
 4. Click on Pipeline
 5. Clone the Dev Stage
 6. Click on new Stage and rename to QA
@@ -159,9 +173,10 @@ We will be using the visual interface
 8. Change the QA scope to "QA" for the value
 9. Click on the QA stage and re-enable the ARM task
 10. Save and Run a release
-   - You can quickly make new environments onces you have your Dev pipeline working
+
 
 ### Create Production Release
+Now create a production environment, but we do not want to swap slots automatically.  You typically will push your code to the production staging slot and then smoke test with some business users. They will be hitting production data, so perform some read only tasks to make sure things are working.
 1. Edit the release pipeline
 2. Clone QA
 3. Rename to Prod
@@ -169,14 +184,14 @@ We will be using the visual interface
 5. In QA disable the ARM task
 6. Clone Prod
 7. Rename cloned Stage to Prod-Swap and Edit
-8. Delete the ARM task from Prod-Swap Stage
-9. Delete the Web Deploy task from Prod-Swap Stage
+8. Delete/Remove the ARM task from Prod-Swap Stage
+9. Delete/Remove the Web Deploy task from Prod-Swap Stage
 10. Edit the Prod stage
-11. Delete the Swap Slots task (we only want this task in the Prod-Swap stage)
+11. Delete/Remove the Swap Slots task (we  want this task just in the Prod-Swap stage)
 12. Save and Run a release
 
 ### Add conditions
-1. Added a variable called DeployARMTemplate and set the value to false
+1. Added a variable called DeployARMTemplate and set the value to "false".  Leave the scope set to "Release" which means the value applies to all stages.
 2. For each stage
    - Enable the ARM template
    - Edit the step
@@ -197,6 +212,8 @@ We will be using the visual interface
 8. Save and Run a release
    You can approve on https://dev.azure.com or click on the email
 
+#### Note
+You can add a stage that runs after the Prod Swap.  On the prod swap add a post approval and if the approval is rejected, we want to do another slot swap to put back the old code.
 
 ### Change the code and enable automatic builds/releases
 1. Edit the Build defination
@@ -223,14 +240,16 @@ We will be using the visual interface
    - You can verify the new code is moving through environments by viewing the websites (the prod slot will have the changes, the old site will be in the preprod slot)
 
 ### Implement a Gate
+Gates allow you to apply custom business logic to your release pipeline.  You can test current metrics to see if a site is too busy to deploy and query a REST endpoints to check on conditions that need to be tested.
 1. Edit the Build 
 2. Clone the Copy Files task SampleWebApp-ARM-Templates
 3. Edit the new task and change the folder to AzureFunction-ARM-Templates
 4. Add a new task Archive Files
    - Root Folder: AzureFunction-Code
+   - Uncheck "Prepend root folder name to archive paths"
    - Archive File to Create: $(Build.ArtifactStagingDirectory)/AzureFunction.zip
 5. Save and Build
-6. Edit the Prod stage
+6. Edit the Prod stage in the Release pipeline
 7. Clone the ARM task
    - Edit Template path (e.g. $(System.DefaultWorkingDirectory)/_Training-Azure-DevOps-Build/drop/arm-function-template.json)
    - Edit the Override template parameters 
@@ -241,7 +260,10 @@ We will be using the visual interface
 8. Clone the App Service Deploy task
    - Change App Type to Function App
    - Uncheck deploy to slot
+   - Change the App Service Name: $(WebApp)-Function-$(Environment)
    - Change the Package / Folder path (e.g. $(System.DefaultWorkingDirectory)/_Training-Azure-DevOps-Build/drop/AzureFunction.zip)
+   - Under Additional Deployment Options check off "Publish using Web Deploy"
+   - Check off Remove additional files at destination
 9. Change the variable DeployARMTemplate to "true" (since we have a new ARM template). 
    - You can disable the approvals as well to save time.     
 10. Save and run to make sure things are working, you should also check to make sure the Function App was deployed      
@@ -258,6 +280,7 @@ We will be using the visual interface
 14. Save and Run a release
     - You can watch the gate perform its test
     
+You can try additional releases and change the Azure Functions return value.  You can unlock the function under Function App Settings | Function app edit mode.
 
 ## Notes 
 - If your web app gets a DLL locked, then add a task (Azure App Service Manage) to restart the staging slot web app
@@ -279,16 +302,19 @@ We will be using the visual interface
 
 
 ### Create a build pipeline
-1. Create a new Build Defination and select "Docker task"
+This will create an Azure Container Registry, build a Docker image, push the Docker image and copy some template files.  We are deploying an ARM template as part of a Build pipeline since our Docker tasks need this resource.
+1. Create a new Build Defination (using the visual designer) and select "Docker Container" template
 2. Add variables
    - ACR_Name -> TrainingAzureDevOpsContainerReg
-   - AzureContainerRegistryConnection -> {"loginServer":"trainingazuredevopscontainerregdev.azurecr.io", "id" : "/subscriptions/{REPLACE ME}/resourceGroups/Training-Azure-DevOps-Docker/providers/Microsoft.ContainerRegistry/registries/trainingazuredevopscontainerregdev"}
+   - AzureContainerRegistryConnection -> {"loginServer":"trainingazuredevopscontainerregdev.azurecr.io", "id" : "/subscriptions/{REPLACE ME SUBSCRIPTION GUID}/resourceGroups/Training-Azure-DevOps-Docker/providers/Microsoft.ContainerRegistry/registries/trainingazuredevopscontainerregdev"}
+      - NOTE: This string has the world "dev" as a suffix.  The string is $(ACR_Name)$(Environment)
    - Environment -> DEV  (Note if you are working with several people all sharing a resource group them make this DEV-{yourname})
    - ResourceGroup -> Training-Azure-DevOps-Docker
 3. Add a task Azure Resource Group Deployment (move to the top of the task list)
    - Set the Azure subscription
    - Set the Resource Group: $(ResourceGroup)
    - Set the Location: East US
+   - Set the ARM template: (e.g. Sample-Docker-ARM-Templates/arm-template-acr.json)
    - Set the Override template parameters: 
    ```
    -ACR_Name $(ACR_Name)$(Environment)
@@ -302,10 +328,10 @@ We will be using the visual interface
 5. Add a Copy File task (at the bottom)
    - Set the Source folder: Sample-Docker-ARM-Templates
    - Set the Target folder: $(Build.ArtifactStagingDirectory)
-5. Add a Publish task  
+5. Add a Publish Build Artifacts task  
 6. Save and Queue
 
-Check you build artifacts and make sure the Azure Container Registry was created.  We need to create this as part of the build (versus release).
+Check you build artifacts and make sure the Azure Container Registry was created.  We need to create this as part of the build (versus release).  You can view the image inthe repo via the portal.  Note the image name, it will match your Azure DevOps repo. Also, your ACR name has been set to lower case.  Mixed cases is not always supported with Docker.
 
 
 ### Create a Release pipeline
@@ -320,7 +346,7 @@ Check you build artifacts and make sure the Azure Container Registry was created
    - ResourceGroup -> Training-Azure-DevOps-Docker
    - WebApp -> TrainingAzureDevOpsLinuxApp (you can specify what you like - must be globally unique in Azure)
  5. Add a task Azure Resource Group Deployment
-   - Set the AAzure subscription
+   - Set the Azure subscription
    - Set the Resource group: $(ResourceGroup)
    - Set Location:  "East US"
    - Set the Template location: $(System.DefaultWorkingDirectory)/_Training-Azure-DevOps-Docker/drop/arm-template-web.json
@@ -330,7 +356,7 @@ Check you build artifacts and make sure the Azure Container Registry was created
    ```
 6. Save and then Queue
 
-Verify that the website is working
+Verify that the website is working.  If you get done the training early, then enhance this with QA and Prod stages.  Review the Dockerfile.  Note that it is totally self contained.  If you use Docker, some customers bulid/compile their code within their Docker.  They 
 
 ### Notes
 - You have to create your ACR before building/pushing our Docker image.  This is why the ACR ARM template is in the Build pipeline.  I consider this a "build" resource which is why it is created here.  Typically, I place all my ARM templates in my Release pipeline.
