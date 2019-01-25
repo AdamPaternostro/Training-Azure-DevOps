@@ -90,7 +90,7 @@
                 "enabled": true,
                 "hostNameSslStates": [
                     {
-                        "name": "[concat(parameters('AzureFunctionAppName'),'training-azure-devops-functionapp.azurewebsites.net')]",
+                        "name": "[concat(parameters('AzureFunctionAppName'),'.azurewebsites.net')]",
                         "sslState": "Disabled",
                         "virtualIP": null,
                         "thumbprint": null,
@@ -98,7 +98,7 @@
                         "hostType": "Standard"
                     },
                     {
-                        "name": "[concat(parameters('AzureFunctionAppName'),'training-azure-devops-functionapp.scm.azurewebsites.net')]",
+                        "name": "[concat(parameters('AzureFunctionAppName'),'.scm.azurewebsites.net')]",
                         "sslState": "Disabled",
                         "virtualIP": null,
                         "thumbprint": null,
