@@ -367,4 +367,4 @@ Verify that the website is working.  If you get done the training early, then en
 
 
 # DevOps Best Practices
-https://github.com/AdamPaternostro/Training-Azure-DevOps/blob/master/DevOps-Best-Practices.md
+https://github.com/AdamPaternostro/DevOps-Best-Practices
